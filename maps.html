@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MIT College Campus Map</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+      #map {
+        height: 100vh;
+        width: 100%;
+      }
+      #department-selector {
+        position: absolute;
+        top: 10px;
+        left: 50px;
+        z-index: 1000;
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      select {
+        margin-bottom: 10px;
+        padding: 5px;
+        width: 250px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="department-selector">
+      <button id="locate-me">Locate Me</button>
+      <br /><br />
+      <select id="end-department">
+        <option value="" disabled selected>Select Destination</option>
+        <option value="MIT Mess">MIT Mess</option>
+        <option value="MIT Back Gate">MIT Back Gate</option>
+        <option value="MIT Main Gate">MIT Main Gate</option>
+        <option value="Charles Babbage Block">Charles Babbage Block</option>
+        <option value="Rajam Hall">Rajam Hall</option>
+        <option value="AU-KBC Research Centre">AU-KBC Research Centre</option>
+      </select>
+      <button id="route-button">Get Route</button>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script>
+      const MIT_COORDINATES = [12.9266, 80.1421];
+      const DEPARTMENT_LOCATIONS = {
+        "MIT Mess": [12.950268886803428, 80.14172371042797],
+        "MIT Back Gate": [12.951664752905954, 80.14127563527093],
+        "MIT Main Gate": [12.946374558482715, 80.13865085238969],
+        "Charles Babbage Block": [12.947690104653873, 80.14079502135925],
+        "Rajam Hall": [12.948685077197213, 80.14145318427224],
+        "AU-KBC Research Centre": [12.947996030963358, 80.14100391427576],
+      };
+      let userLocation = null; // User's location coordinates
+
+      // Initialize map
+      const map = L.map("map").setView(MIT_COORDINATES, 17);
+
+      // Add OpenStreetMap tiles
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map);
+
+      // Add markers for departments
+      Object.entries(DEPARTMENT_LOCATIONS).forEach(([dept, coords]) => {
+        const marker = L.marker(coords, {
+          title: dept
+            .replace("-", " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase()),
+        }).addTo(map);
+
+        marker.bindPopup(
+          `<b>${dept
+            .replace("-", " ")
+            .replace(/\b\w/g, (l) =>
+              l.toUpperCase()
+            )}</b><br><a href="#" onclick="openGoogleMaps('${coords[0]}', '${
+            coords[1]
+          }')">Get Directions</a>`
+        );
+      });
+
+      // Function to open Google Maps
+      function openGoogleMaps(lat, lng) {
+        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        window.open(gmapsUrl, "_blank");
+      }
+
+      // Locate user and add marker
+      document.getElementById("locate-me").addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser.");
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            userLocation = [
+              position.coords.latitude,
+              position.coords.longitude,
+            ];
+            L.marker(userLocation, { title: "You are here" })
+              .addTo(map)
+              .bindPopup("<b>You are here!</b>")
+              .openPopup();
+            map.setView(userLocation, 17);
+          },
+          () => {
+            alert("Unable to retrieve your location.");
+          }
+        );
+      });
+
+      // Get Route button
+      document.getElementById("route-button").addEventListener("click", () => {
+        const endDept = document.getElementById("end-department").value;
+        if (!userLocation) {
+          alert("Please locate yourself first by clicking 'Locate Me'.");
+          return;
+        }
+        if (!endDept) {
+          alert("Please select a destination.");
+          return;
+        }
+
+        // Redirect to Google Maps with user's location as start and destination as end
+        const [endLat, endLng] = DEPARTMENT_LOCATIONS[endDept];
+        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation[0]},${userLocation[1]}&destination=${endLat},${endLng}`;
+        window.open(gmapsUrl, "_blank");
+      });
+    </script>
+  </body>
+</html>
+walk2.html
+Displaying walk2.html.
