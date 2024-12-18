@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -65,7 +64,7 @@
         "Rajam Hall": [12.948685077197213, 80.14145318427224],
         "AU-KBC Research Centre": [12.947996030963358, 80.14100391427576],
       };
-      let userLocation = null; // User's location coordinates
+      let userLocation = null;
 
       // Initialize map
       const map = L.map("map").setView(MIT_COORDINATES, 17);
@@ -77,20 +76,10 @@
 
       // Add markers for departments
       Object.entries(DEPARTMENT_LOCATIONS).forEach(([dept, coords]) => {
-        const marker = L.marker(coords, {
-          title: dept
-            .replace("-", " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase()),
-        }).addTo(map);
+        const marker = L.marker(coords, { title: dept }).addTo(map);
 
         marker.bindPopup(
-          `<b>${dept
-            .replace("-", " ")
-            .replace(/\b\w/g, (l) =>
-              l.toUpperCase()
-            )}</b><br><a href="#" onclick="openGoogleMaps('${coords[0]}', '${
-            coords[1]
-          }')">Get Directions</a>`
+          `<b>${dept}</b><br><a href="#" onclick="openGoogleMaps('${coords[0]}', '${coords[1]}')">Get Directions</a>`
         );
       });
 
@@ -101,17 +90,14 @@
       }
 
       // Locate user and add marker
-      document.getElementById("locate-me").addEventListener("click", () => {
+      function locateUser() {
         if (!navigator.geolocation) {
           alert("Geolocation is not supported by your browser.");
           return;
         }
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            userLocation = [
-              position.coords.latitude,
-              position.coords.longitude,
-            ];
+            userLocation = [position.coords.latitude, position.coords.longitude];
             L.marker(userLocation, { title: "You are here" })
               .addTo(map)
               .bindPopup("<b>You are here!</b>")
@@ -122,7 +108,13 @@
             alert("Unable to retrieve your location.");
           }
         );
-      });
+      }
+
+      // Automatically locate the user on page load
+      document.addEventListener("DOMContentLoaded", locateUser);
+
+      // Button to manually locate user
+      document.getElementById("locate-me").addEventListener("click", locateUser);
 
       // Get Route button
       document.getElementById("route-button").addEventListener("click", () => {
@@ -136,7 +128,6 @@
           return;
         }
 
-        // Redirect to Google Maps with user's location as start and destination as end
         const [endLat, endLng] = DEPARTMENT_LOCATIONS[endDept];
         const gmapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation[0]},${userLocation[1]}&destination=${endLat},${endLng}`;
         window.open(gmapsUrl, "_blank");
@@ -144,5 +135,3 @@
     </script>
   </body>
 </html>
-walk2.html
-Displaying walk2.html.
